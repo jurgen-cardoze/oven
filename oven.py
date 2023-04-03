@@ -1,161 +1,122 @@
-import time, datetime
-import sys
+import time,sys
 import requests
 from fhict_cb_01.CustomPymata4 import CustomPymata4
 
-#-----------
 # Constants
-#-----------
-LED_PINS = [5, 6, 7]
-KEY1_PIN = 8
-KEY2_PIN = 9
+GREEN_LED_PIN = 5
+YELLOW_LED_PIN = 7
+BLUE_LED_PIN = 6
 RED_LED_PIN = 4
-#------------------------------
-# Initialized global variables
-#------------------------------
-prevPin = LED_PINS[0]
-board = CustomPymata4()
+LEFT_BUTTON = 9
+RIGHT_BUTTON = 8
 
-#-----------
-# Functions
-#-----------
+# Create the Arduino board object
+#board = CustomPymata4("COM4")
 
-def countdown(h, m, s):
-    global timer_started
-    
-    # Calculate the total number of seconds
-    total_seconds = h * 3600 + m * 60 + s
-
-    # Create a flag to indicate whether the timer is running or not
-    timer_running = True
-    
-    # While loop that checks if total_seconds reaches zero
-    # If not zero, decrement total time by one second
-    while total_seconds > 0 and timer_running:
-
-        # Timer represents time left on countdown
-        timer = datetime.timedelta(seconds=total_seconds)
-
-        # Extract minutes and seconds from the timer
-        minutes, seconds = divmod(timer.seconds, 60)
-
-        # Format the minutes and seconds as a string
-        time_str = '{:02d}{:02d}'.format(minutes, seconds)
-
-        # Display the time left on the timer on the Arduino
-        board.displayShow(time_str)
-        
-        # Prints the time left on the timer
-        print(timer, end="\r")
- 
-        # Delays the program one second
-        time.sleep(1)
- 
-        # Reduces total time by one second
-        total_seconds -= 1
-
-    # Reset the timer_started flag when the countdown is over
-    timer_started = False
-
-    if board.digital_read(KEY1_PIN) == 0:
-        print("Timer restarted")
-        countdown(h, m, s)
-
-def setup():
-    # Initialize the board and set the pins to output and input mode
-    global board
-    board = CustomPymata4()
-
-    for pin in LED_PINS:
-        board.set_pin_mode_digital_output(pin)
-    board.set_pin_mode_digital_input_pullup(KEY1_PIN) # Enable internal pull-up resistor
-    board.set_pin_mode_digital_input_pullup(KEY2_PIN) # Enable internal pull-up resistor
-
-def start_countdown():
-    # Inputs for hours, minutes, seconds on timer
-    h = int(input("Enter the time in hours: "))
-    m = int(input("Enter the time in minutes: "))
-    s = int(input("Enter the time in seconds: "))
-    
-    global countdown_running, timer_started
-    countdown_running = True
-    timer_started = True
-    countdown(h, m, s)
-    print("Bzzzt! pizza is done done!")
-
-def restart_countdown():
-    global countdown_running, timer_started
-    countdown_running = True
-    timer_started = True
-
-def cook():
-    # Turn on the red LED to simulate cooking
-    board.digital_pin_write(RED_LED_PIN, 1)
-    time.sleep(10) # Cook for 10 seconds
+def reset_cooking():
+    # Turn off all LEDs
+    board.digital_pin_write(GREEN_LED_PIN, 0)
+    board.digital_pin_write(YELLOW_LED_PIN, 0)
+    board.digital_pin_write(BLUE_LED_PIN, 0)
     board.digital_pin_write(RED_LED_PIN, 0)
-    notify_server()
+    # Reset the cooking process
+    board.digital_pin_write(RED_LED_PIN, 1)
+    time.sleep(5)
+    board.digital_pin_write(RED_LED_PIN, 0)
+    board.digital_pin_write(YELLOW_LED_PIN, 1)
+    time.sleep(1)
+    response = requests.post("http://example.com/oven/done")
+    if response.status_code == 200:
+        print("kitchen notified food is in the oven ")
+    else:
+        print("Failed to notify the server")
+    board.digital_pin_write(YELLOW_LED_PIN, 0)
+    board.digital_pin_write(BLUE_LED_PIN, 1)
+    countdown(0, 5)
+    time.sleep(3)
+    board.digital_pin_write(BLUE_LED_PIN, 0)
+    board.digital_pin_write(GREEN_LED_PIN, 1)
+    time.sleep(5)
+    board.digital_pin_write(GREEN_LED_PIN, 0)
+    response = requests.post("http://example.com/oven/done")
+    if response.status_code == 200:
+        print("Server notified that the oven is done cooking")
+    else:
+        print("Failed to notify the server")
 
-def notify_server():
-    # Send an HTTP POST request to the server to notify that the cooking is done
-    # Replace the URL with the actual server endpoint
-    url = "http://127.0.0.1:5000/"
-    payload = {'message': 'Cooking is done'}
-    requests.post(url, data=payload)
+def countdown(minutes, seconds):
+    minutes= int(input("Enter the time in minutes: "))
+    seconds= int(input("Enter the time in seconds: "))
+    total_seconds = minutes * 60 + seconds
+
+    for i in range(total_seconds, -1, -1):
+        print("Time remaining:{:02d}:{:02d}".format(i // 60, i % 60))
+        time_str= '{:02d}{:02d}'.format(i //60, i % 60)
+        board.displayShow(time_str)
+        time.sleep(1)
+        
+def setup():
+    global board
+    board = CustomPymata4("COM4")
+    # Set the LED pins as output pins
+    board.set_pin_mode_digital_output(GREEN_LED_PIN)
+    board.set_pin_mode_digital_output(YELLOW_LED_PIN)
+    board.set_pin_mode_digital_output(BLUE_LED_PIN)
+    board.set_pin_mode_digital_output(RED_LED_PIN)
+
+# Set the button pins as input pins with pull-up resistors
+    board.set_pin_mode_digital_input_pullup(LEFT_BUTTON)
+    board.set_pin_mode_digital_input_pullup(RIGHT_BUTTON)
 
 def loop():
-    global timer_started
+    level, time_stamp = board.digital_read(LEFT_BUTTON)
+    
+    if (level== 0):
+        reset_cooking()
+        time.sleep(0.1)
 
-    # Check if the button is pressed to start cooking
-    if board.digital_read(KEY1_PIN) == 0 and not timer_started:
-        start_countdown()  # Call the start_countdown function
-        timer_started = True  # Set the flag to indicate that the timer has been started
+# Wait for the right button to be pressed before starting the cooking process
+    
+def cooking():
+    # Turn on the red LED to indicate that the oven is ON
+    board.digital_pin_write(RED_LED_PIN, 1)
+    # Wait for 5 seconds to simulate start up time
+    time.sleep(5)
+    # Turn off the red LED and turn on the yellow LED to indicate that the food is being prepared
+    board.digital_pin_write(RED_LED_PIN, 0)
+    board.digital_pin_write(YELLOW_LED_PIN, 1)
+    # Wait for 1 second to simulate prep time
+    time.sleep(1)
+    response = requests.post("http://example.com/oven/done")
+    if response.status_code == 200:
+        print("Kitchen notified food is in the oven.")
+    else:
+        print("Failed to notify the server.")
+    # Turn off the yellow LED and turn on the blue LED to indicate that the food is cooking
+    board.digital_pin_write(YELLOW_LED_PIN, 0)
+    board.digital_pin_write(BLUE_LED_PIN, 1)
+    # Wait for 3 seconds to simulate cooking time
+    countdown(0, 5)
+    time.sleep(3)
+    # Turn off the blue LED and turn on the green LED to indicate that the food is done
+    board.digital_pin_write(BLUE_LED_PIN, 0)
+    board.digital_pin_write(GREEN_LED_PIN, 1)
+    # Wait for 5 seconds to display the green LED for some time
+    time.sleep(5)
+    # Turn off the green LED
+    board.digital_pin_write(GREEN_LED_PIN, 0)
+    # Communicate with the server application that the oven is done cooking
+    response = requests.post("http://example.com/oven/done")
+    if response.status_code == 200:
+        print("Server notified that the oven is done cooking.")
+    else:
+        print("Failed to notify the server.")
 
-    # Cycle through the LED pins and light them up one at a time
-    for pin in LED_PINS:
-        board.digital_pin_write(prevPin, 0)
-        board.digital_pin_write(pin, 1)
-        time.sleep(0.5)
-        prevPin = pin
-
-start_countdown()
-countdown()
-restart_countdown()
-cook()
-loop()
-#--------------
-# Main program
-#--------------
-
-# Initialize a variable to keep track of whether the timer has been started or not
-timer_started = False
-# Main program loop
+setup()
 while True:
     try:
-        # Check if the button is pressed to start cooking
-        if board.digital_read(KEY1_PIN) == 0 and not timer_started:
-            countdown_running=False
-            start_countdown()  # Call the start_countdown function
-            timer_started = True  # Set the flag to indicate that the timer has been started
-            
-            
-
-        # Check if the key2 button is pressed to restart the timer
-        if board.digital_read(KEY2_PIN) == 0 and timer_started:
-            print("Timer restarted")
-            restart_countdown()  # Call the restart_countdown function
-            h = input("Enter the time in hours: ")
-            m = input("Enter the time in minutes: ")
-            s = input("Enter the time in seconds: ")
-            countdown(int(h), int(m), int(s))
-
-        if board.digital_read(KEY1_PIN) == 0:
-            print("Button 1 pressed")
-        if board.digital_read(KEY2_PIN) == 0:
-            print("Button 2 pressed")
-        
-        loop()  # Move the loop function call to the end of the while loop    
-    
-    except KeyboardInterrupt:
-        print('Shutdown')
+        loop()  
+    except KeyboardInterrupt: # crtl+C
+        print ('shutdown')
         board.shutdown()
-        sys.exit(0)
+        sys.exit(0)   
