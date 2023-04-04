@@ -1,0 +1,11 @@
+
+.custom {
+ height: 83px;
+}
+
+.backgroundImage {
+ background-image: url("assets/pizza_bros.jpg");
+    background-size: cover;
+    height: 50vh;
+    
+}

@@ -12,8 +12,10 @@ RIGHT_BUTTON = 8
 
 # Create the Arduino board object
 #board = CustomPymata4("COM4")
-
+activator = 1
 def reset_cooking():
+    global activator
+    activator = 1
     # Turn off all LEDs
     board.digital_pin_write(GREEN_LED_PIN, 0)
     board.digital_pin_write(YELLOW_LED_PIN, 0)
@@ -25,7 +27,8 @@ def reset_cooking():
     board.digital_pin_write(RED_LED_PIN, 0)
     board.digital_pin_write(YELLOW_LED_PIN, 1)
     time.sleep(1)
-    response = requests.post("http://example.com/oven/done")
+    data = {'switch': activator}
+    response = requests.post("http://127.0.0.1:5000/arduino", data=data)
     if response.status_code == 200:
         print("kitchen notified food is in the oven ")
     else:
@@ -38,7 +41,9 @@ def reset_cooking():
     board.digital_pin_write(GREEN_LED_PIN, 1)
     time.sleep(5)
     board.digital_pin_write(GREEN_LED_PIN, 0)
-    response = requests.post("http://example.com/oven/done")
+    activator = 1 - activator
+    data = {'switch': activator}
+    response = requests.post("http://127.0.0.1:5000/arduino",data=data)
     if response.status_code == 200:
         print("Server notified that the oven is done cooking")
     else:
@@ -57,7 +62,7 @@ def countdown(minutes, seconds):
         
 def setup():
     global board
-    board = CustomPymata4("COM4")
+    board = CustomPymata4("COM7")
     # Set the LED pins as output pins
     board.set_pin_mode_digital_output(GREEN_LED_PIN)
     board.set_pin_mode_digital_output(YELLOW_LED_PIN)
