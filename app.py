@@ -1,7 +1,8 @@
-from flask import Flask, render_template, url_for, jsonify,request, redirect
+from flask import Flask, render_template, url_for, jsonify, request, redirect
 import csv
 import os
 import time
+import threading
 
 app = Flask(__name__)
 
@@ -23,9 +24,11 @@ def order():
     
     return render_template('order.html')
 
+
 @app.route('/customer_info', methods=['GET'])
 def show_customer_info():
     return render_template('customer_info.html')
+
 
 @app.route('/arduino', methods=['POST'])
 def arduino():
@@ -35,10 +38,12 @@ def arduino():
     print(switch)
     return 'Switch received'
 
+
 @app.route('/')
 def home():
     return render_template('index.html', image_url=url_for('static', filename='pizza_bros.jpg'))
-    
+
+
 @app.route('/save_customer_info', methods=['POST'])
 def save_customer_info():
     # Get customer information from the form
@@ -74,13 +79,64 @@ def save_customer_info():
             writer = csv.writer(file)
             writer.writerows(rows)
         
-        # Check if there is a row in the queue_database.csv file
-        with open('queue_database.csv', mode='r') as file:
-            reader = csv.reader(file)
-            next(reader)  # Skip header row
-            order = next(reader, None)
+        return redirect('/')
 
-        while True:
+@app.route('/menu')
+def menu():
+    return render_template('menu.html')
+
+
+@app.route('/basket')
+def basket():
+    return render_template('basket.html')
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+
+@app.route('/orderMethod')
+def ordermethod():
+    return render_template('ordermethod.html', image_url=url_for('static', filename='pizza_bros.jpg'))
+
+
+@app.route('/deliveryInformation')
+def deliveryInformation():
+    return render_template('deliveryInformation.html')
+
+
+@app.route('/orderFinished')
+def orderfinished():
+    return render_template('orderFinished.html')
+
+
+@app.route('/ourProgram')
+def ourProgram():
+    return render_template('ourProgram.html', image_url=url_for('static', filename='pizza_bros.jpg'))
+
+@app.route("/productsPage")
+def productsPage():
+    return render_template("productsPage.html")
+
+@app.route("/test")
+def test():
+    return render_template("test.html")
+
+def start_loop():
+    last_switch = None
+    while True:
+        # Check if the value of switch has changed
+        if last_switch != switch:
+            # Update last_switch to the new value
+            last_switch = switch
+
+            # Check if there is a row in the queue_database.csv file
+            with open('queue_database.csv', mode='r') as file:
+                reader = csv.reader(file)
+                next(reader)  # Skip header row
+                order = next(reader, None)
+
             if switch == "1" and order is None:
                 # Get the first complete row from main_database.csv and append it to the queue_database.csv file
                 with open('main_database.csv', mode='r') as file:
@@ -117,46 +173,13 @@ def save_customer_info():
                     writer.writerows(rows)
                 
                 order = None
-            
-            # Wait for 1 second before checking again
-            time.sleep(3)
-            
-    return redirect('/')
-
-
-
-@app.route('/menu')
-def menu():
-    return render_template('menu.html') 
-@app.route('/basket')
-def basket():
-    return render_template('basket.html') 
-
-@app.route('/login')
-def login():
-    return render_template('login.html') 
-
-@app.route('/orderMethod')
-def ordermethod():
-    return render_template('ordermethod.html', image_url=url_for('static', filename='pizza_bros.jpg')) 
-
-@app.route('/deliveryInformation')
-def deliveryInformation():
-    return render_template('deliveryInformation.html') 
-
-@app.route('/orderFinished')
-def orderfinished():
-    return render_template('orderFinished.html') 
-
-@app.route('/ourProgram')
-def ourProgram():
-    return render_template('ourProgram.html', image_url=url_for('static', filename='pizza_bros.jpg')) 
-@app.route("/productsPage")
-def productsPage():
-    return render_template('productsPage.html')
-@app.route('/test')
-def test():
-    return render_template('test.html')
+        
+        # Wait for 5 seconds before checking again
+        time.sleep(5)
 
 if __name__ == '__main__':
+    switch = "1"
+    import threading
+    thread = threading.Thread(target=start_loop)
+    thread.start()
     app.run(debug=True)
