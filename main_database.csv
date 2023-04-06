@@ -1,6 +1,6 @@
-customer_name,customer_number,customer_id,order_info
-52,ivan,3215232
-52,gosho,52344
-64,gosho,52344
-34,gosho,52344
-11,ivan,2421
+pizza_type,pizza_size,quantity,total_amount,name,phone_number,orderID
+cheese,large,1,13,gosho,23141,87
+hawaiian,large,2,34,gosho,23141,87
+cheese,family-sized,2,38,rutold,8554,24
+hawaiian,family-sized,2,46,rutold,8554,24
+veggie,family-sized,2,46,rutold,8554,24

@@ -1,14 +1,62 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Order Info</title>
+    <title>Pizzeria Cashier</title>
   </head>
   <body>
-    <h1>Enter Order Info</h1>
-    <form action="/order" method="POST">
-      <label for="order_info">Order Info:</label>
-      <input type="text" id="order_info" name="order_info"><br><br>
-      <button type="submit">submit</button>
+    <h1>Pizzeria Cashier</h1>
+    <h2>Menu</h2>
+    <ul>
+      <li>Pepperoni Pizza - $10</li>
+      <li>Cheese Pizza - $8</li>
+      <li>Veggie Pizza - $12</li>
+      <li>Hawaiian Pizza - $12</li>
+      <li>Meat Lovers Pizza - $14</li>
+    </ul>
+    <form id="order-form" action="{{ url_for('submit_order') }}" method="POST">
+      <label for="pizza-type">Select Pizza Type:</label>
+      <select id="pizza-type" name="pizza-type">
+        <option value="pepperoni">Pepperoni Pizza - $10</option>
+        <option value="cheese">Cheese Pizza - $8</option>
+        <option value="veggie">Veggie Pizza - $12</option>
+        <option value="hawaiian">Hawaiian Pizza - $12</option>
+        <option value="meat-lovers">Meat Lovers Pizza - $14</option>
+      </select>
+      <br><br>
+      <label for="pizza-size">Select Pizza Size:</label>
+      <select id="pizza-size" name="pizza-size">
+        <option value="normal">Normal</option>
+        <option value="large">Large (+$5)</option>
+        <option value="family-sized">Family-sized (+$11)</option>
+      </select>
+      <br><br>
+      <label for="quantity">Enter Quantity:</label>
+      <input type="number" id="quantity" name="quantity" min="1" max="10">
+      <br><br>
+      <label for="total">Total Amount:</label>
+      <input type="text" id="total" name="total" readonly>
+      <br><br>
+      <button type="button" onclick="calculateTotal()">Calculate Total</button>
+      <button type="button" onclick="addToBasket()">Add to Basket</button>
+      <button type="reset">Reset</button>
     </form>
+    <h2>Basket</h2>
+    <table id="basket">
+      <thead>
+        <tr>
+          <th>Pizza Type</th>
+          <th>Pizza Size</th>
+          <th>Quantity</th>
+          <th>Price</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      </tbody>
+    </table>
+    <br>
+    <p>Total Price: <span id="total-price">$0</span></p>
+    <button type="button" onclick="placeOrder()"><a href="/customer-info">Order</a></button>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
   </body>
 </html>

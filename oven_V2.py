@@ -62,7 +62,7 @@ def countdown(minutes, seconds):
         
 def setup():
     global board
-    board = CustomPymata4("COM7")
+    board = CustomPymata4("COM6")
     # Set the LED pins as output pins
     board.set_pin_mode_digital_output(GREEN_LED_PIN)
     board.set_pin_mode_digital_output(YELLOW_LED_PIN)

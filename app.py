@@ -1,35 +1,38 @@
-from flask import Flask, render_template, url_for, jsonify, request, redirect
+from flask import Flask, request, render_template, redirect, url_for
 import csv
+import random
 import os
 import time
 import threading
 
 app = Flask(__name__)
-
-
-@app.route('/order', methods=['GET', 'POST'])
-def order():
-    if request.method == 'POST':
-        # Get order information from the form
-        order_info = request.form['order_info']
-        customer_name = ''
-        customer_number = ''
-        
-        # Write the order information to temporary_database.csv file
-        with open('temporary_database.csv', mode='a', newline='') as file:
-            writer = csv.writer(file)
-            writer.writerow([order_info, customer_name, customer_number])
-        
-        return redirect('/customer_info')
-    
+@app.route('/order')
+def orders():
     return render_template('order.html')
+@app.route("/submit-order", methods=["POST"])
+def submit_order():
+    if request.method == "POST":
+        pizza_type = request.form.getlist("pizza_type")
+        pizza_size = request.form.getlist("pizza_size")
+        quantity = request.form.getlist("quantity")
+        total_amount = request.form.getlist("total_amount")
 
+        # Read existing orders from temporary CSV file
+        with open("temporary_database.csv", mode="a", newline="") as temp_csv_file:
+            fieldnames = ["pizza_type", "pizza_size", "quantity", "total_amount"]
+            writer = csv.DictWriter(temp_csv_file, fieldnames=fieldnames)
+            if temp_csv_file.tell() == 0:
+                writer.writeheader()
+            for i in range(len(pizza_type)):
+                writer.writerow({
+                    "pizza_type": pizza_type[i],
+                    "pizza_size": pizza_size[i],
+                    "quantity": quantity[i],
+                    "total_amount": total_amount[i]
+                })
 
-@app.route('/customer_info', methods=['GET'])
-def show_customer_info():
-    return render_template('customer_info.html')
-
-
+        # Redirect to the customer-info route
+        return redirect(url_for("customer_info"))
 @app.route('/arduino', methods=['POST'])
 def arduino():
     global switch
@@ -44,42 +47,54 @@ def home():
     return render_template('index.html', image_url=url_for('static', filename='pizza_bros.jpg'))
 
 
-@app.route('/save_customer_info', methods=['POST'])
-def save_customer_info():
-    # Get customer information from the form
-    customer_name = request.form['customer_name']
-    customer_number = request.form['customer_number']
-    
-    # Read the temporary_database.csv file and update the customer information
-    with open('temporary_database.csv', mode='r') as file:
-        reader = csv.reader(file)
-        rows = list(reader)
-        row_count = len(rows)
-        
-        # Get the last row and update the customer information
-        order_info = rows[row_count-1][0]
-        rows[row_count-1] = [order_info, customer_name, customer_number]
-        
-        # Skip rows with empty fields
+@app.route("/customer-info", methods=["GET", "POST"])
+def customer_info():
+    if request.method == "POST":
+        name = request.form["name"]
+        phone_number = request.form["phone_number"]
+
+        # Read existing orders from temporary CSV file
+        with open("temporary_database.csv", mode="r", newline="") as temp_csv_file:
+            temp_reader = csv.DictReader(temp_csv_file)
+            temp_rows = list(temp_reader)
+
+        # Add name and phone number to each row
+        for row in temp_rows:
+            row["name"] = name
+            row["phone_number"] = phone_number
+
+        # Generate a unique order ID for all rows
+        order_id = random.randint(1, 100)
+        for row in temp_rows:
+            row["orderID"] = order_id
+
+        # Check if all values in each row are filled
         complete_rows = []
-        for row in rows:
-            if all(row):
+        for row in temp_rows:
+            if all(row.values()):
                 complete_rows.append(row)
-        
+
         # Append complete rows to the main_database.csv file
-        with open('main_database.csv', mode='a', newline='') as file:
-            writer = csv.writer(file)
+        with open("main_database.csv", mode="a", newline="") as main_csv_file:
+            fieldnames = ["pizza_type", "pizza_size", "quantity", "total_amount", "name", "phone_number", "orderID"]
+            writer = csv.DictWriter(main_csv_file, fieldnames=fieldnames)
+            if main_csv_file.tell() == 0:
+                writer.writeheader()
             writer.writerows(complete_rows)
-                
+
         # Remove complete rows from the temporary_database.csv file
-        rows = [row for row in rows if row not in complete_rows]
-        
+        rows = [row for row in temp_rows if row not in complete_rows]
+
         # Write the updated data back to the temporary_database.csv file
-        with open('temporary_database.csv', mode='w', newline='') as file:
-            writer = csv.writer(file)
+        with open("temporary_database.csv", mode="w", newline="") as temp_csv_file:
+            fieldnames = ["pizza_type", "pizza_size", "quantity", "total_amount", "name", "phone_number", "orderID"]
+            writer = csv.DictWriter(temp_csv_file, fieldnames=fieldnames)
+            writer.writeheader()
             writer.writerows(rows)
-        
-        return redirect('/')
+
+        return "Thank you for your order!"
+
+    return render_template("customer_info.html")
 
 @app.route('/menu')
 def menu():
@@ -134,44 +149,47 @@ def start_loop():
             # Check if there is a row in the queue_database.csv file
             with open('queue_database.csv', mode='r') as file:
                 reader = csv.reader(file)
-                next(reader)  # Skip header row
+                next(reader, None)  # Skip header row
                 order = next(reader, None)
 
             if switch == "1" and order is None:
-                # Get the first complete row from main_database.csv and append it to the queue_database.csv file
+                # Get the first complete row from main_database.csv and append all rows with the same orderid to the queue_database.csv file
                 with open('main_database.csv', mode='r') as file:
                     reader = csv.reader(file)
-                    next(reader)  # Skip header row
+                    next(reader, None)  # Skip header row
+                    rows = []
+                    orderid = None
                     for row in reader:
-                        if all(row):
-                            order = row
+                        if not all(row) or (orderid is not None and row[-1] != orderid):
                             break
-                
-                if order is not None:
-                    with open('queue_database.csv', mode='a', newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerow(order)
+                        rows.append(row)
+                        orderid = row[-1]
+                    if rows:
+                        x = len(rows)  # Get number of rows with same order ID
+                        with open('queue_database.csv', mode='a', newline='') as file:
+                            writer = csv.writer(file)
+                            writer.writerows(rows)
 
-                    # Delete the order from the main_database.csv file
-                    with open('main_database.csv', mode='r') as file:
-                        reader = csv.reader(file)
-                        rows = list(reader)
-                        rows.remove(order)
+                        # Delete the rows with the same order ID from the main_database.csv file
+                        with open('main_database.csv', mode='r') as file:
+                            reader = csv.reader(file)
+                            rows = [row for row in reader if row[-1] != orderid]
 
-                    with open('main_database.csv', mode='w', newline='') as file:
-                        writer = csv.writer(file)
-                        writer.writerows(rows)
+                        with open('main_database.csv', mode='w', newline='') as file:
+                            writer = csv.writer(file)
+                            writer.writerows(rows)
 
             elif switch == "0" and order is not None:
-                # Delete the last row from queue_database.csv
+                # Delete the rows with the same order ID from queue_database.csv
                 with open('queue_database.csv', mode='r') as file:
-                    rows = list(csv.reader(file))
-                    rows.pop()
-                
-                with open('queue_database.csv', mode='w', newline='') as file:
-                    writer = csv.writer(file)
-                    writer.writerows(rows)
-                
+                    reader = csv.reader(file)
+                    rows = list(reader)
+                    orderid = rows[1][-1]  # Get order ID from second row
+                    rows_to_keep = [rows[0]] + [row for row in rows[1:] if row[-1] != orderid]
+                    with open('queue_database.csv', mode='w', newline='') as file:
+                        writer = csv.writer(file)
+                        writer.writerows(rows_to_keep)
+
                 order = None
         
         # Wait for 5 seconds before checking again
