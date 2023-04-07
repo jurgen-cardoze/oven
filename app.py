@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 import csv
 import random
 import os
@@ -6,6 +6,8 @@ import time
 import threading
 
 app = Flask(__name__)
+
+
 @app.route('/cashier')
 def cashier():
     return render_template('cashier.html')
@@ -101,8 +103,41 @@ def customer_info():
         return "Thank you for your order!"
 
     return render_template("customer_info.html")
+@app.route('/data')
+def get_data():
+    queue_data = []
+    with open('queue_database.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            queue_data.append(row)
 
+    main_data = []
+    with open('main_database.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            main_data.append(row)
 
+    return jsonify({
+        'queue_data': queue_data,
+        'main_data': main_data
+    })
+@app.route('/cook', methods=['GET', 'POST'])
+def cook():
+    queue_data = []
+    with open('queue_database.csv', 'r') as queue_file:
+        for line in queue_file:
+            queue_data.append(line.strip().split(','))
+
+    main_data = []
+    with open('main_database.csv', 'r') as main_file:
+        for line in main_file:
+            main_data.append(line.strip().split(','))
+    global switch
+    if request.method == 'POST':
+        switch = '0' if switch == '1' else '1'
+    switch_text = 'Off' if switch == '0' else 'On'
+    return render_template('cook.html', switch=switch, switch_text=switch_text,queue_data=queue_data, main_data=main_data)
+    
 
 
 @app.route('/basket')

@@ -38,17 +38,29 @@ function calculateTotal(id) {
   document.getElementById("total" + id).value = "$" + total.toFixed(2);
 }
 function updateImage(id) {
-  const select = document.getElementById(`item-type${id}`);
   const card = document.querySelector(`#item-type${id}`).closest('.card');
   const img = card.querySelector('img');
+  const select = document.getElementById(`item-type${id}`);
 
-  select.addEventListener('change', function() {
-    const value = this.value;
+  const updateImageSrc = () => {
+    const value = select.value;
     const imagename = value + '.png';
     const url = "/static/" + imagename;
     img.src = url;
-  });
+  }
+
+  updateImageSrc(); // call once to update the image initially
+
+  select.addEventListener('change', updateImageSrc); // attach event listener
 }
+
+// attach event listener to all select elements with the class 'item-type'
+document.querySelectorAll('.item-type').forEach(select => {
+  select.addEventListener('change', function() {
+    const id = select.id.replace('item-type', '');
+    updateImage(id);
+  });
+});
 
 function addToBasket(id) {
   const itemType = document.getElementById("item-type" + id).value;

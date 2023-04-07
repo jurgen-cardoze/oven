@@ -2,17 +2,104 @@
 <html>
   <head>
     <title>Customer Info</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-aFq/bzH65dt+w6FI2ooMVUpc+21e0SRygnTpmBvdBgSdnuTN7QbdgL+OapgHtvPp" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
+    <nav class="navbar p-0 m-0" style="background: rgb(229,37,33);
+    background: linear-gradient(90deg, rgba(229,37,33,1) 0%, rgba(67,176,71,1) 100%);">
+        <div class="container-fluid m-0 p-0">
+            <div class=" p-1 d-flex w-50 justify-content-between align-items-center" >
+                <a class="" href="/">
+                    <img src="{{url_for('static', filename= 'logo.png')}}" alt="" width="75" height="75" class=" m-0 p-0">
+                </a>
+                <ul class="nav">
+                    <li class="nav-item ">
+                        <a class="nav-link bg-light rounded-5" aria-current="page" href="#"  style="color:black;">Deals</a>
+                    </li>
+                </ul>
+
+            </div>
+            <div class="w-50 p-1 custom" >
+                <ul class="nav d-flex justify-content-between align-items-center custom">
+                    <li class="nav-item">
+                        <a class="nav-link bg-light rounded-5" aria-current="page" href="/menu" style="color:black;">Menu</a>
+                    </li>
+                    <li class="nav-item ms-auto me-2 ">
+                      <a class="nav-link rounded-5 fs-3 fa fa-shopping-basket"  style="color:white;"></a>
+                  </li>
+                    <li class="nav-item">
+                        <a class="nav-link bg-light rounded-5" href="#" style="color:black;">Log in</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="d-flex justify-content-evenly gap-4 w-100 mx-auto mt-5">
+      <div class="d-flex justify-content-between p-4 flex-column text-dark w-25 ms-3">
     <h1>Enter Customer Info</h1>
     <form action="/customer-info" method="POST">
+      <div class="form-group mb-3">
       <label for="name">Name:</label>
-      <input type="text" id="name" name="name"><br>
-    
+      <input type="text" class="form-control" id="name" name="name"><br>
+    </div>
+    <div class="form-group">
       <label for="phone_number">Phone number:</label>
-      <input type="text" id="phone_number" name="phone_number"><br>
-    
-      <input type="submit" value="Submit">
+      <input type="text" class="form-control" id="phone_number" name="phone_number"><br>
+    </div>
+      <input type="submit" class="btn mt-5 text-white" style="background-color: #049CD8;" value="Submit">
     </form>
+    </div>
+  </div>
+
+    <footer class="text-center text-white mt-5 fixed-bottom" style="background: rgb(229,37,33);
+    background: linear-gradient(90deg, rgba(229,37,33,1) 0%, rgba(67,176,71,1) 100%);">
+        <!-- Grid container -->
+        <div class="container p-2 pb-0">
+          <!-- Section: Social media -->
+          <section class="mb-2">
+            <!-- Facebook -->
+            <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"
+              ><i class="fa fa-facebook-f"></i
+            ></a>
+      
+            <!-- Twitter -->
+            <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"
+              ><i class="fa fa-twitter"></i
+            ></a>
+      
+            <!-- Google -->
+            <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"
+              ><i class="fa fa-google"></i
+            ></a>
+      
+            <!-- Instagram -->
+            <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"
+              ><i class="fa fa-instagram"></i
+            ></a>
+      
+            <!-- Linkedin -->
+            <a class="btn btn-outline-light btn-floating m-1" href="#!" role="button"
+              ><i class="fa fa-linkedin"></i
+            ></a>
+            
+          </section>
+          <!-- Section: Social media -->
+        </div>
+        <!-- Grid container -->
+      
+        <!-- Copyright -->
+        <div class="text-center p-1" style="background-color: rgba(0, 0, 0, 0.2);">
+          © 2020 Copyright:
+          <a class="text-white" href="#">Mario&Luigi</a>
+        </div>
+        <!-- Copyright -->
+      </footer>
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha2/dist/js/bootstrap.min.js" integrity="sha384-heAjqF+bCxXpCWLa6Zhcp4fu20XoNIA98ecBC1YkdXhszjoejr5y9Q77hIrv8R9i" crossorigin="anonymous"></script>
   </body>
 </html>
