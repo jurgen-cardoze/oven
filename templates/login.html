@@ -41,21 +41,20 @@
     </nav>
     
     <div class="d-flex justify-content-evenly gap-4 w-100 mx-auto mt-5">
-        <div class="d-flex justify-content-between p-4 flex-column text-dark w-25 ms-3">
-            <form class="d-flex flex-column">
-                <div class="form-group mb-3">
-                  <label for="exampleInputEmail1">Email address</label>
-                  <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-                </div>
-                <div class="form-group">
-                  <label for="exampleInputPassword1">Password</label>
-                  <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-                </div>
-                <button type="submit" class="btn mt-5 text-white" style="background-color: #049CD8;">Log in</button>
-              </form>
-     
-        </div>
-    </div>
+      <div class="d-flex justify-content-between p-4 flex-column text-dark w-25 ms-3">
+          <form class="d-flex flex-column" action="/login" method="POST">
+              <div class="form-group">
+                  <label for="username">Username:</label>
+                  <input type="text" class="form-control" id="username" name="username" placeholder="Username">
+              </div>
+              <div class="form-group">
+                  <label for="password">Password:</label>
+                  <input type="password" class="form-control" id="password" name="password" placeholder="Password">
+              </div>
+              <button type="submit" value="Submit" class="btn mt-5 text-white" style="background-color: #049CD8;">Log in</button>
+          </form>
+      </div>
+  </div>
 
 
     <footer class="text-center text-white mt-5 fixed-bottom" style="background: rgb(229,37,33);

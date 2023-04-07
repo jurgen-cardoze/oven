@@ -144,10 +144,29 @@ def cook():
 def basket():
     return render_template('basket.html')
 
-
 @app.route('/login')
-def login():
+def renderLogin():
     return render_template('login.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username == 'mario' and password == 'mario':
+            return redirect('/cashier')
+        elif username == 'luigi' and password == 'luigi':
+            return redirect('/cook')
+        else:
+            return "Invalid login"
+    else:
+        return '''
+            <form action="/login" method="post">
+                <p><input type=text name=username>
+                <p><input type=password name=password>
+                <p><input type=submit value=Login>
+            </form>
+        '''
 
 
 @app.route('/orderMethod')
