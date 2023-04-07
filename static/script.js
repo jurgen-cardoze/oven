@@ -1,97 +1,132 @@
 let basket = [];
 
-function calculateTotal() {
-  const pizzaType = document.getElementById("pizza-type").value;
-  const pizzaSize = document.getElementById("pizza-size").value;
-  const quantity = document.getElementById("quantity").value;
+function calculateTotal(id) {
+  const itemType = document.getElementById("item-type" + id).value;
+  const itemSize = document.getElementById("item-size" + id).value;
+  const quantity = document.getElementById("quantity" + id).value;
   let price;
-
-  if (pizzaType === "pepperoni") {
+  
+  if (itemType === "pepperoni") {
     price = 10;
-  } else if (pizzaType === "cheese") {
-    price = 8;
-  } else if (pizzaType === "veggie") {
+  } else if (itemType === "cheese") {
+    price = 8; 
+  } else if (itemType === "veggie" || itemType === "hawaiian") {
     price = 12;
-  } else if (pizzaType === "hawaiian") {
-    price = 12;
-  } else if (pizzaType === "meat-lovers") {
+  } else if (itemType === "meat-lovers") {
     price = 14;
+  } else if (itemType === "cola" || itemType === "fanta" || itemType === "sprite") {
+    price = 2.5;
   }
 
-  if (pizzaSize === "normal") {
+  if (itemSize === "normal") {
     // no additional cost
-  } else if (pizzaSize === "large") {
-    price += 5;
-  } else if (pizzaSize === "family-sized") {
-    price += 11;
+  } else if (itemSize === "large") {
+    if (["cola", "fanta", "sprite"].includes(itemType)) {
+      price += 1;
+    } else {
+      price += 5;
+    }
+  } else if (itemSize === "extra-large") {
+    if (["cola", "fanta", "sprite"].includes(itemType)) {
+      price += 2.5;
+    } else {
+      price += 11;
+    }
   }
 
-  let total;
-  if (!quantity) {
-    total = "";
-  } else {
-    total = `$${price * quantity}`;
-  }
-  document.getElementById("total").value = total;
+  let total = price * quantity;
+  document.getElementById("total" + id).value = "$" + total.toFixed(2);
+}
+function updateImage(id) {
+  const select = document.getElementById(`item-type${id}`);
+  const card = document.querySelector(`#item-type${id}`).closest('.card');
+  const img = card.querySelector('img');
+
+  select.addEventListener('change', function() {
+    const value = this.value;
+    const imagename = value + '.png';
+    const url = "/static/" + imagename;
+    img.src = url;
+  });
 }
 
-function addToBasket() {
-  const pizzaType = document.getElementById("pizza-type").value;
-  const pizzaSize = document.getElementById("pizza-size").value;
-  const quantity = document.getElementById("quantity").value;
-  const totalAmount = document.getElementById("total").value.slice(1);
+function addToBasket(id) {
+  const itemType = document.getElementById("item-type" + id).value;
+  const itemSize = document.getElementById("item-size" + id).value;
+  const quantity = document.getElementById("quantity" + id).value;
+  const price = document.getElementById("total" + id).value;
 
   const item = {
-    pizzaType,
-    pizzaSize,
+    itemType,
+    itemSize,
     quantity,
-    totalAmount,
+    price,
+    totalAmount: parseFloat(price.substring(1)) // set totalAmount to the calculated value
   };
   basket.push(item);
-  renderBasket();
-}
 
-function removeFromBasket(index) {
-  basket.splice(index, 1);
-  renderBasket();
-}
+  const basketTable = document.getElementById("basket").getElementsByTagName('tbody')[0];
+  const newRow = basketTable.insertRow();
 
-function renderBasket() {
-  const basketContainer = document.getElementById("basket");
-  let html = "<ul>";
-  let totalAmount = 0;
-  basket.forEach((item, index) => {
-    html += `<li>${item.pizzaType} (${item.pizzaSize}), Quantity: ${item.quantity}, Price: ${item.totalAmount} <button onclick="removeFromBasket(${index})">Remove</button></li>`;
-    totalAmount += parseFloat(item.totalAmount);
+  const typeCell = newRow.insertCell(0);
+  const sizeCell = newRow.insertCell(1);
+  const quantityCell = newRow.insertCell(2);
+  const priceCell = newRow.insertCell(3);
+  const actionsCell = newRow.insertCell(4);
+
+  typeCell.innerHTML = item.itemType;
+  sizeCell.innerHTML = item.itemSize;
+  quantityCell.innerHTML = item.quantity;
+  priceCell.innerHTML = item.price;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.innerHTML = "Remove";
+  removeBtn.addEventListener('click', () => {
+    const index = basket.indexOf(item);
+    basket.splice(index, 1);
+    newRow.remove();
+    updateTotalPrice();
   });
-  html += "</ul>";
-  html += `<p>Total: $${totalAmount.toFixed(2)}</p>`;
-  basketContainer.innerHTML = html;
+  actionsCell.appendChild(removeBtn);
+
+  updateTotalPrice();
+}
+
+function updateTotalPrice() {
+  let totalPrice = 0;
+  for (let i = 0; i < basket.length; i++) {
+    const item = basket[i];
+    totalPrice += parseFloat(item.price.substring(1));
+  }
+  document.getElementById("total-price").innerHTML = "$" + totalPrice.toFixed(2);
 }
 
 function placeOrder() {
   const form = new FormData();
   basket.forEach((item) => {
-    form.append("pizza_type", item.pizzaType);
-    form.append("pizza_size", item.pizzaSize);
-    form.append("quantity", item.quantity);
-    form.append("total_amount", item.totalAmount);
-    
+  form.append("itemType", item.itemType);
+  form.append("itemSize", item.itemSize);
+  form.append("quantity", item.quantity);
+  form.append("totalAmount", item.totalAmount);
+  
   });
-
+  
   const xhr = new XMLHttpRequest();
   xhr.open("POST", "/submit-order", true);
   xhr.onload = function () {
-    if (this.status === 200) {
-      alert("Order placed successfully!");
-      basket = [];
-      renderBasket();
-    } else {
-      alert("There was an error while placing your order.");
-    }
+  if (this.status === 200) {
+  alert("Order placed successfully!");
+  basket = [];
+  renderBasket();
+  } else {
+  alert("There was an error while placing your order.");
+  }
   };
   xhr.send(form);
-}
+  }
+  
+  // Add event listener to the 'Place Order' button
+document.getElementById("submit-order").addEventListener("click", placeOrder);
 
 document.getElementById("add-to-basket").addEventListener("click", addToBasket);
 document.getElementById("submit-order").addEventListener("click", placeOrder);

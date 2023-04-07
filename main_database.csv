@@ -1,6 +1,18 @@
 pizza_type,pizza_size,quantity,total_amount,name,phone_number,orderID
-cheese,large,1,13,gosho,23141,87
-hawaiian,large,2,34,gosho,23141,87
-cheese,family-sized,2,38,rutold,8554,24
-hawaiian,family-sized,2,46,rutold,8554,24
-veggie,family-sized,2,46,rutold,8554,24
+pepperoni,normal,1,8,Miroslav Partalov,35231292,46
+cheese,large,1,13,Miroslav Partalov,35231292,46
+fanta,large,1,7.5,Miroslav Partalov,35231292,46
+veggie,large,1,17,miroslav,35231292,45
+veggie,extra-large,1,23,Miroslav Partalov,35231292,68
+fanta,normal,1,2.5,Miroslav Partalov,35231292,68
+fanta,large,2,15,Miroslav Partalov,35231292,68
+hawaiian,extra-large,1,23,Miroslav Partalov,35231292,21
+cola,extra-large,1,5,Miroslav Partalov,35231292,21
+cheese,large,1,13,Miroslav Partalov,35231292,34
+fanta,large,1,3.5,Miroslav Partalov,35231292,34
+cola,large,1,3.5,Miroslav Partalov,35231292,34
+pepperoni,large,1,15,Miroslav Partalov,35231292,30
+fanta,large,1,0,Miroslav Partalov,35231292,30
+pepperoni,large,1,15.00,Miroslav Partalov,35231292,15
+pepperoni,extra-large,1,21.00,Miroslav Partalov,35231292,15
+cola,extra-large,1,5.00,Miroslav Partalov,35231292,15

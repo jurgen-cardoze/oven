@@ -1,8 +1,3 @@
 pizza_type,pizza_size,quantity,total_amount,name,phone_number,orderID
-veggie,normal,1,12,Miroslav Partalov,35231292,19
-veggie,normal,2,24,Miroslav Partalov,35231292,19
-veggie,normal,5,60,Miroslav Partalov,35231292,19
-veggie,normal,5,60,Miroslav Partalov,35231292,19
-veggie,normal,5,60,Miroslav Partalov,35231292,19
-cheese,normal,2,16,Miroslav Partalov,35231292,19
-meat-lovers,family-sized,2,50,Miroslav Partalov,35231292,19
+hawaiian,large,1,17.00,Miroslav Partalov,35231292,5
+fanta,extra-large,1,5.00,Miroslav Partalov,35231292,5

@@ -6,33 +6,39 @@ import time
 import threading
 
 app = Flask(__name__)
-@app.route('/order')
-def orders():
-    return render_template('order.html')
+@app.route('/cashier')
+def cashier():
+    return render_template('cashier.html')
+@app.route('/menu')
+def menu():
+    return render_template('menu.html')
 @app.route("/submit-order", methods=["POST"])
 def submit_order():
     if request.method == "POST":
-        pizza_type = request.form.getlist("pizza_type")
-        pizza_size = request.form.getlist("pizza_size")
+        item_type = request.form.getlist("itemType")
+        item_size = request.form.getlist("itemSize")
         quantity = request.form.getlist("quantity")
-        total_amount = request.form.getlist("total_amount")
+        total_amount = request.form.getlist("totalAmount")
+# Read existing orders from temporary CSV file
+    with open("temporary_database.csv", mode="a", newline="") as temp_csv_file:
+        fieldnames = ["item_type", "item_size", "quantity", "total_amount"]
+        writer = csv.DictWriter(temp_csv_file, fieldnames=fieldnames)
+        if temp_csv_file.tell() == 0:
+            writer.writeheader()
+        for i in range(len(item_type)):
+            writer.writerow({
+                "item_type": item_type[i],
+                "item_size": item_size[i],
+                "quantity": quantity[i],
+                "total_amount": total_amount[i]
+            })
 
-        # Read existing orders from temporary CSV file
-        with open("temporary_database.csv", mode="a", newline="") as temp_csv_file:
-            fieldnames = ["pizza_type", "pizza_size", "quantity", "total_amount"]
-            writer = csv.DictWriter(temp_csv_file, fieldnames=fieldnames)
-            if temp_csv_file.tell() == 0:
-                writer.writeheader()
-            for i in range(len(pizza_type)):
-                writer.writerow({
-                    "pizza_type": pizza_type[i],
-                    "pizza_size": pizza_size[i],
-                    "quantity": quantity[i],
-                    "total_amount": total_amount[i]
-                })
+    # Redirect to the customer-info route
+    return redirect(url_for("customer_info"))
+    
 
-        # Redirect to the customer-info route
-        return redirect(url_for("customer_info"))
+
+
 @app.route('/arduino', methods=['POST'])
 def arduino():
     global switch
@@ -96,9 +102,7 @@ def customer_info():
 
     return render_template("customer_info.html")
 
-@app.route('/menu')
-def menu():
-    return render_template('menu.html')
+
 
 
 @app.route('/basket')
@@ -131,8 +135,16 @@ def ourProgram():
     return render_template('ourProgram.html', image_url=url_for('static', filename='pizza_bros.jpg'))
 
 @app.route("/productsPage")
+def productsPagePasta():
+    return render_template("productsPagePasta.html")
+
+@app.route("/productsPage/Pizza")
+def productsPagePizza():
+    return render_template("productsPagePizza.html")
+
+@app.route("/productsPage/Desserts")
 def productsPage():
-    return render_template("productsPage.html")
+    return render_template("productsPageDessert.html")
 
 @app.route("/test")
 def test():
