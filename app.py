@@ -341,6 +341,11 @@ def productsPage():
 def test():
     return render_template("test.html")
 
+@app.route("/coming_soon")
+def coming_soon():
+    return render_template("comig_soon.html")
+
+
 def start_loop():
     last_switch = None
     while True:
