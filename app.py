@@ -344,6 +344,13 @@ def test():
 @app.route("/coming_soon")
 def coming_soon():
     return render_template("comig_soon.html")
+@app.route("/subscribe", methods=["POST"])
+def subscribe():
+    email = request.form["email"]
+    with open("emails.csv", "a", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([email])
+    return render_template("thank_you.html")
 
 
 def start_loop():
