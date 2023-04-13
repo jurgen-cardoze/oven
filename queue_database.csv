@@ -1,1 +1,4 @@
 pizza_type,pizza_size,quantity,total_amount,name,phone_number,orderID
+cheese,large,1,13,jurgen,35231292,18
+cheese,large,1,13,jurgen,35231292,18
+veggie,large,1,17,jurgen,35231292,18

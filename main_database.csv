@@ -1,1 +1,8 @@
 pizza_type,pizza_size,quantity,total_amount,name,phone_number,orderID
+pepperoni,normal,1,10.00,miroslav,35231292,29
+veggie,normal,1,12.00,miroslav,35231292,29
+veggie,extra-large,1,23.00,miroslav,35231292,29
+cola,normal,1,2.50,Miroslav Partalov,35231292,91
+cheese,large,1,13.00,Miroslav Partalov,35231292,91
+hawaiian,large,1,17.00,rutold,35231292,44
+meat-lovers,large,2,38.00,rutold,35231292,44
